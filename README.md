@@ -47,7 +47,24 @@ The required fixed-image gate
 `trivy image --severity CRITICAL --ignore-unfixed --exit-code 1 fest-backend:0.2`
 returned exit code `0`; its filtered result was 0 CRITICAL and 0 HIGH.
 
-Version `1.0.0` immutable digest: pending Docker Hub push.
+Version `1.0.0` immutable digest:
+`sha256:04bede43b848626be9a222beddb9d9de807788691789f662737e890cfb5d3610`.
+The `1.0.0`, `1.0`, and `latest` tags all resolved to this digest when checked
+against Docker Hub.
+
+The unsigned `1.0.1` release was pushed at digest
+`sha256:8f4ade0057da3b59dffe246c2c0e2b66e5bb50adc5108cb8d10d62b5ac0eb9de`.
+Compose pulled `deepraj07/fest-backend:1.0.0` from Docker Hub after the local
+backend tags were removed and returned version `1.0.0` with all three persisted
+registrations.
+
+## Cosign results
+
+Cosign `v3.1.4` was installed on Windows. The `1.0.0` digest was signed using
+the password-protected local `cosign.key`; only [cosign.pub](cosign.pub) is
+tracked. Verification with that public key exited `0`. Verification of the
+unsigned `1.0.1` digest failed with `no signatures found` and exit code `10`,
+as required.
 
 ## Assessment evidence
 
@@ -71,6 +88,4 @@ are still missing:
 ## Incomplete tasks
 
 - Capture the required Stage 1 and Stage 2 screenshots.
-- Push `1.0.0`, record its actual digest, and update Compose verification evidence.
-- Run `cosign version` in a new PowerShell session, then sign `1.0.0`, verify it, and demonstrate unsigned `1.0.1` rejection.
 - Capture and retain all required evidence screenshots.

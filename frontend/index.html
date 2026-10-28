@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FestPass 2026</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 760px; padding: 0 1rem; }
+    form { display: grid; gap: .75rem; max-width: 28rem; }
+    input, button { font: inherit; padding: .6rem; }
+    li { margin: .4rem 0; }
+    .status { color: #555; }
+  </style>
+</head>
+<body>
+  <h1>FestPass 2026</h1>
+  <p>Registration number: <strong id="regno">Loading...</strong></p>
+  <p>Backend version: <strong id="version">Loading...</strong></p>
+  <form id="registration-form">
+    <label>Name <input name="name" required></label>
+    <label>Event <input name="event" required></label>
+    <button type="submit">Register</button>
+  </form>
+  <p id="message" class="status"></p>
+  <h2>Registrations</h2>
+  <ul id="registrations"></ul>
+  <script>
+    const message = document.getElementById("message");
+    const registrations = document.getElementById("registrations");
+
+    async function loadHealth() {
+      const response = await fetch("/api/health");
+      const health = await response.json();
+      document.getElementById("regno").textContent = health.regno;
+      document.getElementById("version").textContent = health.version;
+    }
+
+    async function loadRegistrations() {
+      const response = await fetch("/api/registrations");
+      if (!response.ok) throw new Error("Unable to load registrations");
+      const items = await response.json();
+      registrations.replaceChildren(...items.map((item) => {
+        const element = document.createElement("li");
+        element.textContent = `${item.name} - ${item.event}`;
+        return element;
+      }));
+    }
+
+    document.getElementById("registration-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = new FormData(event.currentTarget);
+      const response = await fetch("/api/registrations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.get("name"), event: form.get("event") })
+      });
+      if (!response.ok) {
+        message.textContent = "Registration failed.";
+        return;
+      }
+      event.currentTarget.reset();
+      message.textContent = "Registration saved.";
+      await loadRegistrations();
+    });
+
+    Promise.all([loadHealth(), loadRegistrations()]).catch(() => {
+      message.textContent = "The backend is not available yet.";
+    });
+  </script>
+</body>
+</html>
